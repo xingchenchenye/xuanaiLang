@@ -25,6 +25,8 @@ class PythonCodeGenerator:
             '__xuan_set_member__ = __xuan_runtime["set_member"]',
             '__xuan_define_struct__ = __xuan_runtime["define_struct"]',
             '__xuan_new_struct__ = __xuan_runtime["new_struct"]',
+            '__xuan_make_error__ = __xuan_runtime["make_error"]',
+            '__xuan_error_payload__ = __xuan_runtime["error_payload"]',
             "",
         ]
         self.indent = 0
@@ -82,10 +84,27 @@ class PythonCodeGenerator:
             case ast.ReturnStmt(value=value):
                 self._emit("return" if value is None else f"return {self._expr(value)}")
             case ast.AssertStmt(condition=condition, message=message):
-                if message is None:
-                    self._emit(f"assert {self._expr(condition)}")
+                message_text = '"断言失败"' if message is None else self._expr(message)
+                self._emit(f"if not {self._expr(condition)}:")
+                self.indent += 1
+                self._emit(f"raise __xuan_make_error__({message_text})")
+                self.indent -= 1
+            case ast.ThrowStmt(value=value):
+                self._emit(f"raise __xuan_make_error__({self._expr(value)})")
+            case ast.TryStmt(try_branch=try_branch, catch_name=catch_name, catch_branch=catch_branch):
+                self._emit("try:")
+                self._with_indent(try_branch)
+                err_name = self._temp()
+                self._emit(f"except Exception as {err_name}:")
+                self.indent += 1
+                if catch_name is not None:
+                    self._emit(f"{catch_name} = __xuan_error_payload__({err_name})")
+                if catch_branch:
+                    for item in catch_branch:
+                        self._statement(item)
                 else:
-                    self._emit(f"assert {self._expr(condition)}, {self._expr(message)}")
+                    self._emit("pass")
+                self.indent -= 1
             case ast.ExprStmt(value=value):
                 self._emit(self._expr(value))
             case _:

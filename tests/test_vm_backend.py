@@ -79,6 +79,19 @@ class VmBackendTests(unittest.TestCase):
         self.assertIn("STRUCT 引擎", asm)
         self.assertIn("STRUCT_INIT ('引擎'", asm)
 
+    def test_disassembler_contains_error_flow(self) -> None:
+        asm = self.pipeline.disassemble(
+            """
+            试 {
+                抛 "失败"；
+            } 捕 错 {
+                显(错)；
+            }
+            """
+        )
+        self.assertIn("TRY 错", asm)
+        self.assertIn("THROW", asm)
+
 
 if __name__ == "__main__":
     unittest.main()

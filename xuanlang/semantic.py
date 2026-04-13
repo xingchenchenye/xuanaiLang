@@ -159,6 +159,17 @@ class SemanticAnalyzer:
                 self._expression(cond)
                 if msg is not None:
                     self._expression(msg)
+            case ast.ThrowStmt(value=value):
+                self._expression(value)
+            case ast.TryStmt(try_branch=try_branch, catch_name=catch_name, catch_branch=catch_branch):
+                self._with_child_scope(try_branch)
+                saved_scope = self.scope
+                self.scope = Scope(saved_scope)
+                if catch_name is not None:
+                    self.scope.define(Symbol(catch_name, 任意))
+                for item in catch_branch:
+                    self._statement(item)
+                self.scope = saved_scope
             case ast.ExprStmt(value=value):
                 self._expression(value)
             case _:

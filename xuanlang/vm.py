@@ -125,6 +125,12 @@ class BytecodeCompiler:
                     "ASSERT",
                     (self._expression(condition), None if message is None else self._expression(message)),
                 )
+            case ast.ThrowStmt(value=value):
+                return BytecodeInstruction("THROW", (self._expression(value),))
+            case ast.TryStmt(try_branch=try_branch, catch_name=catch_name, catch_branch=catch_branch):
+                try_code = BytecodeBlock([self._statement(item) for item in try_branch])
+                catch_code = BytecodeBlock([self._statement(item) for item in catch_branch])
+                return BytecodeInstruction("TRY", (try_code, catch_name, catch_code))
             case ast.ExprStmt(value=value):
                 return BytecodeInstruction("EVAL", (self._expression(value),))
             case _:
@@ -291,6 +297,18 @@ class BytecodeDisassembler:
                     lines.append(f"{pad}    MESSAGE:")
                     lines.extend(self._expr_lines(message, depth + 2))
                 continue
+            if op == "THROW":
+                lines.append(label)
+                lines.extend(self._expr_lines(args[0], depth + 1))
+                continue
+            if op == "TRY":
+                try_code, catch_name, catch_code = args
+                lines.append(f"{label} {catch_name or '_'}")
+                lines.append(f"{pad}    TRY:")
+                lines.extend(self.format_block(try_code, depth + 2).splitlines())
+                lines.append(f"{pad}    CATCH:")
+                lines.extend(self.format_block(catch_code, depth + 2).splitlines())
+                continue
             if op == "EVAL":
                 lines.append(label)
                 lines.extend(self._expr_lines(args[0], depth + 1))
@@ -342,6 +360,8 @@ class VirtualMachine:
         global_env.define("__importer__", runtime["importer"])
         global_env.define("__define_struct__", runtime["define_struct"])
         global_env.define("__new_struct__", runtime["new_struct"])
+        global_env.define("__make_error__", runtime["make_error"])
+        global_env.define("__error_payload__", runtime["error_payload"])
         self.execute_block(block, global_env)
         namespace = global_env.flatten()
         namespace["__xuan_exports__"] = {
@@ -415,7 +435,19 @@ class VirtualMachine:
                 result = self.evaluate(condition, env)
                 if not self._truthy(result):
                     extra = self.evaluate(message, env) if message is not None else "断言失败"
-                    raise XuanRuntimeError(str(extra))
+                    raise env.get("__make_error__")(extra)
+            case "THROW", (expr,):
+                raise env.get("__make_error__")(self.evaluate(expr, env))
+            case "TRY", (try_code, catch_name, catch_code):
+                try:
+                    self.execute_block(try_code, Environment(env))
+                except (ReturnSignal, BreakSignal, ContinueSignal):
+                    raise
+                except Exception as error:
+                    catch_env = Environment(env)
+                    if catch_name is not None:
+                        catch_env.define(catch_name, env.get("__error_payload__")(error))
+                    self.execute_block(catch_code, catch_env)
             case "EVAL", (expr,):
                 self.evaluate(expr, env)
             case _:

@@ -54,6 +54,10 @@ class AstOptimizer:
                 if isinstance(optimized, ast.Literal) and optimized.value is True:
                     return []
                 return [ast.AssertStmt(optimized, self._expr(message) if message is not None else None)]
+            case ast.ThrowStmt(value=value):
+                return [ast.ThrowStmt(self._expr(value))]
+            case ast.TryStmt(try_branch=try_branch, catch_name=catch_name, catch_branch=catch_branch):
+                return [ast.TryStmt(self._opt_block(try_branch), catch_name, self._opt_block(catch_branch))]
             case ast.ExprStmt(value=value):
                 return [ast.ExprStmt(self._expr(value))]
             case _:

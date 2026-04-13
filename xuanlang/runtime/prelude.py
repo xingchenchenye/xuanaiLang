@@ -4,6 +4,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from ..stdlib.modules import build_stdlib_registry
+from .exceptions import error_payload, make_throw_signal
 from .ai import KVCache, attention, layer_norm, quantize_int8, transformer_step
 from .records import XuanStructType
 from .tensor import Tensor, quantize_int4
@@ -82,6 +83,8 @@ def create_runtime_scope(
         "set_member": 写入成员,
         "define_struct": 定义结构,
         "new_struct": 创建结构,
+        "make_error": make_throw_signal,
+        "error_payload": error_payload,
         "collect_exports": lambda namespace: {
             key: value
             for key, value in namespace.items()

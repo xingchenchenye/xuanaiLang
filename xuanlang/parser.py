@@ -45,6 +45,10 @@ class Parser:
             return self._return_stmt()
         if self._match(TokenKind.ASSERT):
             return self._assert_stmt()
+        if self._match(TokenKind.THROW):
+            return self._throw_stmt()
+        if self._match(TokenKind.TRY):
+            return self._try_stmt()
         assignment = self._try_assign_stmt()
         if assignment is not None:
             return assignment
@@ -200,6 +204,20 @@ class Parser:
         message = self._expression() if self._match(TokenKind.COMMA) else None
         self._consume(TokenKind.SEMICOLON, "断言语句后缺少分号")
         return ast.AssertStmt(condition, message)
+
+    def _throw_stmt(self) -> ast.ThrowStmt:
+        value = self._expression()
+        self._consume(TokenKind.SEMICOLON, "抛出语句后缺少分号")
+        return ast.ThrowStmt(value)
+
+    def _try_stmt(self) -> ast.TryStmt:
+        try_branch = self._block()
+        self._consume(TokenKind.CATCH, "试语句后缺少“捕”")
+        catch_name = None
+        if self._check(TokenKind.IDENT):
+            catch_name = self._advance().value
+        catch_branch = self._block()
+        return ast.TryStmt(try_branch, catch_name, catch_branch)
 
     def _block(self) -> list[ast.Statement]:
         self._consume(TokenKind.LBRACE, "代码块缺少左花括号")

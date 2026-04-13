@@ -64,6 +64,14 @@ class SourceFormatter:
                 return f"{pad}返；" if value is None else f"{pad}返 {self._expr(value)}；"
             case ast.AssertStmt(condition=condition, message=message):
                 return f"{pad}断 {self._expr(condition)}；" if message is None else f"{pad}断 {self._expr(condition)}, {self._expr(message)}；"
+            case ast.ThrowStmt(value=value):
+                return f"{pad}抛 {self._expr(value)}；"
+            case ast.TryStmt(try_branch=try_branch, catch_name=catch_name, catch_branch=catch_branch):
+                header = f"{pad}试 {{"
+                catch_header = f"{pad}捕 {{"
+                if catch_name is not None:
+                    catch_header = f"{pad}捕 {catch_name} {{"
+                return "\n".join([header, *self._block(try_branch, depth + 1), f"{pad}}}", catch_header, *self._block(catch_branch, depth + 1), f"{pad}}}"])
             case ast.ExprStmt(value=value):
                 return f"{pad}{self._expr(value)}；"
             case _:

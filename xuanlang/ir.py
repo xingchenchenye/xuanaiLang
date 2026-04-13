@@ -110,6 +110,22 @@ class IRLowerer:
                 if message is not None:
                     args.append(self._expression(message))
                 self.instructions.append(Instruction("ASSERT", tuple(args)))
+            case ast.ThrowStmt(value=value):
+                self.instructions.append(Instruction("THROW", (self._expression(value),)))
+            case ast.TryStmt(try_branch=try_branch, catch_name=catch_name, catch_branch=catch_branch):
+                catch_label = self._label("catch")
+                end_label = self._label("try_end")
+                self.instructions.append(Instruction("TRY_BEGIN", (catch_label,)))
+                for item in try_branch:
+                    self._statement(item)
+                self.instructions.append(Instruction("TRY_END", ()))
+                self.instructions.append(Instruction("JUMP", (end_label,)))
+                self.instructions.append(Instruction("LABEL", (catch_label,)))
+                if catch_name is not None:
+                    self.instructions.append(Instruction("CATCH", (catch_name,)))
+                for item in catch_branch:
+                    self._statement(item)
+                self.instructions.append(Instruction("LABEL", (end_label,)))
             case ast.ExprStmt(value=value):
                 self.instructions.append(Instruction("EVAL", (self._expression(value),)))
 

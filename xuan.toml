@@ -1,7 +1,7 @@
 [language]
 name = "玄言"
 codename = "XuanLang"
-version = "0.7.0"
+version = "0.8.0"
 tagline = "AI 原生中英融合高密度语言"
 
 [developer]

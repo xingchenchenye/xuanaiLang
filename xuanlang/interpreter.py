@@ -96,6 +96,8 @@ class Interpreter:
         global_env.define("__importer__", runtime["importer"])
         global_env.define("__define_struct__", runtime["define_struct"])
         global_env.define("__new_struct__", runtime["new_struct"])
+        global_env.define("__make_error__", runtime["make_error"])
+        global_env.define("__error_payload__", runtime["error_payload"])
         self.execute_block(program.statements, global_env)
         namespace = global_env.flatten()
         namespace["__xuan_exports__"] = {
@@ -177,7 +179,19 @@ class Interpreter:
                 result = self.evaluate(condition, env)
                 if not self._truthy(result):
                     extra = self.evaluate(message, env) if message is not None else "断言失败"
-                    raise XuanRuntimeError(str(extra))
+                    raise env.get("__make_error__")(extra)
+            case ast.ThrowStmt(value=value):
+                raise env.get("__make_error__")(self.evaluate(value, env))
+            case ast.TryStmt(try_branch=try_branch, catch_name=catch_name, catch_branch=catch_branch):
+                try:
+                    self.execute_block(try_branch, Environment(env))
+                except (ReturnSignal, BreakSignal, ContinueSignal):
+                    raise
+                except Exception as error:
+                    catch_env = Environment(env)
+                    if catch_name is not None:
+                        catch_env.define(catch_name, env.get("__error_payload__")(error))
+                    self.execute_block(catch_branch, catch_env)
             case ast.ExprStmt(value=value):
                 self.evaluate(value, env)
             case _:

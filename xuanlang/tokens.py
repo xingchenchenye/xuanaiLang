@@ -29,6 +29,9 @@ class TokenKind(Enum):
     IMPORT = auto()
     AS = auto()
     ASSERT = auto()
+    TRY = auto()
+    CATCH = auto()
+    THROW = auto()
     AND = auto()
     OR = auto()
     NOT = auto()
@@ -85,6 +88,9 @@ KEYWORDS = {
     "引": TokenKind.IMPORT,
     "为": TokenKind.AS,
     "断": TokenKind.ASSERT,
+    "试": TokenKind.TRY,
+    "捕": TokenKind.CATCH,
+    "抛": TokenKind.THROW,
     "且": TokenKind.AND,
     "或": TokenKind.OR,
     "非": TokenKind.NOT,

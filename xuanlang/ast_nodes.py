@@ -143,6 +143,18 @@ class AssertStmt(Statement):
 
 
 @dataclass(slots=True)
+class ThrowStmt(Statement):
+    value: Expression
+
+
+@dataclass(slots=True)
+class TryStmt(Statement):
+    try_branch: list[Statement]
+    catch_name: str | None
+    catch_branch: list[Statement]
+
+
+@dataclass(slots=True)
 class ExprStmt(Statement):
     value: Expression
 
