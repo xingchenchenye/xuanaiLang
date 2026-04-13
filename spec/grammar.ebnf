@@ -1,0 +1,65 @@
+program         = { statement } ;
+
+statement       = import_stmt
+                | var_decl
+                | fun_decl
+                | if_stmt
+                | while_stmt
+                | for_stmt
+                | match_stmt
+                | break_stmt
+                | continue_stmt
+                | return_stmt
+                | assert_stmt
+                | assign_stmt
+                | expr_stmt ;
+
+import_stmt     = "引" module_path "为" identifier terminator ;
+module_path     = string | identifier { "." identifier } ;
+
+var_decl        = ("令" | "常") identifier [ ":" type_expr ] "=" expression terminator ;
+assign_stmt     = identifier "=" expression terminator ;
+fun_decl        = "术" identifier "(" [ params ] ")" [ "->" type_expr ] block ;
+params          = param { "," param } ;
+param           = identifier [ ":" type_expr ] ;
+
+if_stmt         = "若" expression block [ "否则" block ] ;
+while_stmt      = "当" expression block ;
+for_stmt        = "遍" identifier "于" expression block ;
+match_stmt      = "配" expression "{" { match_case } "}" ;
+match_case      = "例" expression block | "默" block ;
+break_stmt      = "停" terminator ;
+continue_stmt   = "续" terminator ;
+return_stmt     = "返" [ expression ] terminator ;
+assert_stmt     = "断" expression [ "," expression ] terminator ;
+expr_stmt       = expression terminator ;
+
+block           = "{" { statement } "}" ;
+
+type_expr       = identifier [ "[" type_expr { "," type_expr } "]" ] ;
+
+expression      = logic_or ;
+logic_or        = logic_and { "或" logic_and } ;
+logic_and       = equality { "且" equality } ;
+equality        = comparison { ("==" | "!=") comparison } ;
+comparison      = term { (">" | ">=" | "<" | "<=") term } ;
+term            = factor { ("+" | "-") factor } ;
+factor          = matmul { ("*" | "/" | "%") matmul } ;
+matmul          = unary { "@" unary } ;
+unary           = [ "-" | "+" | "非" ] unary | postfix ;
+postfix         = primary { call | index | member } ;
+call            = "(" [ arguments ] ")" ;
+index           = "[" expression "]" ;
+member          = "." identifier ;
+arguments       = expression { "," expression } ;
+
+primary         = number
+                | string
+                | "真"
+                | "假"
+                | "空"
+                | identifier
+                | list_literal
+                | "(" expression ")" ;
+
+list_literal    = "[" [ expression { "," expression } ] "]" ;

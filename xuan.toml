@@ -1,0 +1,18 @@
+[language]
+name = "玄言"
+codename = "XuanLang"
+version = "0.7.0"
+tagline = "AI 原生中英融合高密度语言"
+
+[developer]
+name = "开发者星尘_尘夜"
+role = "语言发起者与主设计者"
+
+[focus]
+priority = [
+  "AI native execution",
+  "high density syntax",
+  "tensor and inference runtime",
+  "progressive compiler pipeline",
+  "future mobile hardware optimization"
+]

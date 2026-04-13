@@ -1,0 +1,11 @@
+[language]
+name = "_stage_demo"
+codename = "XuanProject"
+version = "0.1.0"
+
+[project]
+entry = "src/main.xy"
+test_dir = "tests"
+
+[developer]
+name = "开发者星尘_尘夜"
