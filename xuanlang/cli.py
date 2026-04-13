@@ -40,7 +40,7 @@ def main(argv: list[str] | None = None) -> int:
     pipeline = CompilerPipeline()
     projects = ProjectManager()
     if args.command == "about":
-        print("玄言 / XuanLang 0.8.0")
+        print("玄言 / XuanLang 0.7.0")
         print("开发者星尘_尘夜")
         print("方向: AI 原生、中英融合、高密度表达、可演进编译链、独立 VM 执行层、原生映射系统、复杂左值赋值、结构体系统、异常处理系统")
         return 0

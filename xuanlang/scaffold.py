@@ -21,7 +21,7 @@ class ProjectScaffolder:
             "[language]\n"
             f'name = "{project_name}"\n'
             'codename = "XuanProject"\n'
-            'version = "0.8.0"\n\n'
+            'version = "0.7.0"\n\n'
             "[project]\n"
             'entry = "src/main.xy"\n'
             'test_dir = "tests"\n\n'

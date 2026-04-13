@@ -1,6 +1,6 @@
 [project]
 name = "xuanlang"
-version = "0.8.0"
+version = "0.7.0"
 description = "玄言 / XuanLang：面向 AI 原生执行的中英融合高密度编程语言原型，已具备完整前端、三后端执行链、结构化数据能力与 AI 运行时原型"
 readme = "README.md"
 requires-python = ">=3.13"
